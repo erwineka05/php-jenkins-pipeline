@@ -1,0 +1,63 @@
+pipeline {
+    agent any // Menjalankan pipeline di agent mana pun yang tersedia
+
+    stages {
+        // Tahap 1: Clone Repositori
+        stage('Clone Repository') {
+            steps {
+                echo 'Cloning the repository...'
+                // Langkah ini akan meng-clone repo yang dikonfigurasi di Jenkins Job
+                // (Akan kita set di Fase 4)
+            }
+        }
+
+        // Tahap 2: Install Dependencies
+        stage('Install Dependencies') {
+            steps {
+                echo 'Installing PHP dependencies...'
+                // Menjalankan composer untuk menginstal phpunit
+                sh 'composer install'
+            }
+        }
+
+        // Tahap 3: Jalankan Unit Test
+        stage('Run Unit Test') {
+            steps {
+                echo 'Running unit tests...'
+                // Menjalankan tes dengan phpunit
+                sh './vendor/bin/phpunit tests/SimpleTest.php'
+            }
+        }
+
+        // Tahap 4: Build Docker Image
+        stage('Build Docker Image') {
+            steps {
+                echo 'Building Docker image...'
+                // Membuat image Docker dari Dockerfile dengan nama 'php-app-image'
+                sh 'docker build -t php-app-image .'
+            }
+        }
+
+        // Tahap 5: Deploy Aplikasi
+        stage('Deploy Application') {
+            steps {
+                echo 'Deploying application using local Docker image...'
+                // Menjalankan container dari image yang baru dibuat
+                // Aplikasi akan bisa diakses di port 8081
+                sh 'docker run -d --rm --name my-php-app -p 8081:80 php-app-image'
+            }
+        }
+    }
+    post {
+        // Selalu dijalankan setelah semua tahap selesai
+        always {
+            echo 'Pipeline finished. Test the application at http://<IP_SERVER>:8081'
+        }
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
