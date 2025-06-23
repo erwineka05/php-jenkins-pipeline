@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/Pendrs/php-app.git'
+                git branch: 'main', url: 'https://github.com/erwineka05/php-jenkins-pipeline.git'
             }
         }
 
